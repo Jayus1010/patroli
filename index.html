@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Patroli Security</title>
+    
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <style>
+        /* Bagian ini untuk mengatur tampilan (Baju aplikasi) */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            padding: 20px; 
+            background-color: #eef2f3; 
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        #reader { 
+            width: 100%; 
+            border-radius: 10px; 
+            overflow: hidden;
+            border: none !important;
+        }
+        #result-section { 
+            margin-top: 20px; 
+            text-align: left;
+        }
+        .log-entry {
+            background: #f9f9f9;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+        .success-text { color: #2ecc71; font-weight: bold; }
+        h2 { color: #2c3e50; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🛡️ Patroli Security</h2>
+        <p>Arahkan kamera ke Barcode cekpoin</p>
+        
+        <div id="reader"></div>
+        
+        <div id="result-section">
+            <h4>Riwayat Scan:</h4>
+            <div id="scanned-result">
+                <p style="color: #999;">Belum ada data scan...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Bagian ini adalah Logika Aplikasi (Otak)
+        
+        function onScanSuccess(decodedText, decodedResult) {
+            // 1. Ambil waktu saat ini
+            const waktu = new Date().toLocaleString('id-ID');
+            
+            // 2. Buat catatan baru
+            const resultDiv = document.getElementById('scanned-result');
+            const newLog = document.createElement("div");
+            newLog.className = "log-entry";
+            newLog.innerHTML = `✅ <b>${decodedText}</b> <br> <small>${waktu}</small>`;
+            
+            // 3. Masukkan ke daftar paling atas
+            if (resultDiv.firstChild.tagName === 'P') resultDiv.innerHTML = '';
+            resultDiv.insertBefore(newLog, resultDiv.firstChild);
+
+            // 4. Notifikasi sederhana
+            alert("Berhasil Scan: " + decodedText);
+        }
+
+        function onScanFailure(error) {
+            // Abaikan error jika kamera tidak menemukan barcode dalam sekejap
+        }
+
+        // Jalankan Scanner
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", 
+            { 
+                fps: 10,       // Kecepatan kamera menangkap gambar
+                qrbox: { width: 250, height: 250 } // Ukuran kotak fokus scan
+            }
+        );
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    </script>
+
+</body>
+</html>
