@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patroli Security - Realtime GPS</title>
+    <title>Patroli Security PRO - GPS Fix</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; background: #f4f7f6; }
         .container { max-width: 450px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         #reader { width: 100%; border-radius: 10px; overflow: hidden; background: #000; }
         select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; margin-bottom: 15px; }
-        #btn-next { display:none; width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 8px; margin-top: 15px; font-weight: bold; }
-        .log-status { margin-top: 15px; font-size: 14px; color: #555; text-align: left; padding: 10px; border-top: 1px solid #eee; }
-        .gps-indicator { color: #27ae60; font-size: 12px; margin-bottom: 10px; font-weight: bold; }
+        #btn-next { display:none; width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 8px; margin-top: 15px; font-weight: bold; }
+        .gps-status { color: #d35400; font-size: 13px; margin-bottom: 10px; font-weight: bold; padding: 5px; border-radius: 5px; background: #fff3e0; }
+        #status { margin-top: 15px; font-size: 14px; text-align: left; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>🛡️ Patroli Probolinggo</h2>
-    <div id="gps-status" class="gps-indicator">🛰️ Mencari Sinyal GPS...</div>
+    <div id="gps-info" class="gps-status">🛰️ Menunggu Sinyal GPS...</div>
     
     <select id="personil">
         <option value="Ansori">Ansori</option>
@@ -37,54 +37,48 @@
     </select>
 
     <div id="reader"></div>
-    <button id="btn-next" onclick="location.reload()">Scan Cekpoin Selanjutnya</button>
-    <div id="status" class="log-status">Silakan pilih nama & mulai scan.</div>
+    <button id="btn-next" onclick="location.reload()">Scan Selanjutnya</button>
+    <div id="status"></div>
 </div>
 
 <script>
     const html5QrCode = new Html5Qrcode("reader");
+    const infoGPS = document.getElementById("gps-info");
     const statusDiv = document.getElementById("status");
-    const gpsStatus = document.getElementById("gps-status");
     
-    let currentLat = null;
-    let currentLon = null;
+    let latSekarang = null;
+    let lonSekarang = null;
 
-    // FUNGSI BARU: Pantau GPS terus menerus (Realtime)
-    function watchGPS() {
+    // Fungsi untuk memantau pergerakan GPS secara paksa
+    function pantauGPS() {
         if (navigator.geolocation) {
             navigator.geolocation.watchPosition((pos) => {
-                currentLat = pos.coords.latitude;
-                currentLon = pos.coords.longitude;
-                gpsStatus.innerHTML = `🛰️ GPS Aktif: ${currentLat.toFixed(5)}, ${currentLon.toFixed(5)}`;
-                gpsStatus.style.color = "#27ae60";
+                latSekarang = pos.coords.latitude;
+                lonSekarang = pos.coords.longitude;
+                infoGPS.innerHTML = "🛰️ GPS AKTIF: " + latSekarang.toFixed(6) + ", " + lonSekarang.toFixed(6);
+                infoGPS.style.color = "#27ae60";
+                infoGPS.style.background = "#e8f5e9";
             }, (err) => {
-                gpsStatus.innerHTML = "⚠️ GPS Error: " + err.message;
-                gpsStatus.style.color = "#e74c3c";
+                infoGPS.innerHTML = "⚠️ GPS Bermasalah: " + err.message;
             }, { 
                 enableHighAccuracy: true, 
-                maximumAge: 0 
+                maximumAge: 0, 
+                timeout: 5000 
             });
         }
     }
 
-    function startScan() {
-        html5QrCode.start(
-            { facingMode: "environment" }, 
-            { fps: 10, qrbox: 250 },
-            onScanSuccess
-        );
-    }
-
     async function onScanSuccess(decodedText) {
-        if (currentLat === null) {
-            alert("Tunggu sampai GPS terkunci (Indikator Hijau)!");
+        if (!latSekarang) {
+            alert("Sinyal GPS belum stabil. Tunggu angka koordinat muncul!");
             return;
         }
 
         await html5QrCode.stop();
         statusDiv.innerHTML = "⏳ Mengirim data lokasi terbaru...";
 
-        const linkMap = `https://www.google.com/maps?q=${currentLat},${currentLon}`;
+        // PERBAIKAN: Penulisan variabel menggunakan backtick (`) dan simbol ${}
+        const linkMap = "https://www.google.com/maps?q=" + latSekarang + "," + lonSekarang;
         const nama = document.getElementById("personil").value;
 
         try {
@@ -98,16 +92,16 @@
                 })
             });
             
-            statusDiv.innerHTML = `✅ <b>TERSIMPAN!</b><br>Lokasi: ${currentLat}, ${currentLon}`;
+            statusDiv.innerHTML = "✅ <b>BERHASIL!</b><br>Lokasi: " + latSekarang + "," + lonSekarang;
             document.getElementById("btn-next").style.display = "block";
         } catch (e) {
-            statusDiv.innerHTML = "❌ Gagal kirim. Cek koneksi internet.";
+            statusDiv.innerHTML = "❌ Gagal kirim. Cek internet!";
         }
     }
 
-    // Jalankan GPS & Scanner
-    watchGPS();
-    startScan();
+    // Mulai Pantau GPS & Kamera
+    pantauGPS();
+    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanSuccess);
 </script>
 </body>
 </html>
