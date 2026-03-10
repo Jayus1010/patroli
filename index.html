@@ -3,23 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Patroli Security - Versi GPS Akurat</title>
+    <title>Patroli Security - Realtime GPS</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; background: #f4f7f6; }
         .container { max-width: 450px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         #reader { width: 100%; border-radius: 10px; overflow: hidden; background: #000; }
         select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; margin-bottom: 15px; }
-        #btn-next { display:none; width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 8px; margin-top: 15px; font-weight: bold; font-size: 16px; }
+        #btn-next { display:none; width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 8px; margin-top: 15px; font-weight: bold; }
         .log-status { margin-top: 15px; font-size: 14px; color: #555; text-align: left; padding: 10px; border-top: 1px solid #eee; }
-        h2 { color: #333; margin-bottom: 10px; }
+        .gps-indicator { color: #27ae60; font-size: 12px; margin-bottom: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>🛡️ Patroli Probolinggo</h2>
-    <p>Pilih nama Anda sebelum scan:</p>
+    <div id="gps-status" class="gps-indicator">🛰️ Mencari Sinyal GPS...</div>
+    
     <select id="personil">
         <option value="Ansori">Ansori</option>
         <option value="Mustofa">Mustofa</option>
@@ -37,71 +38,75 @@
 
     <div id="reader"></div>
     <button id="btn-next" onclick="location.reload()">Scan Cekpoin Selanjutnya</button>
-    <div id="status" class="log-status">Menunggu Scan...</div>
+    <div id="status" class="log-status">Silakan pilih nama & mulai scan.</div>
 </div>
 
 <script>
     const html5QrCode = new Html5Qrcode("reader");
     const statusDiv = document.getElementById("status");
+    const gpsStatus = document.getElementById("gps-status");
+    
+    let currentLat = null;
+    let currentLon = null;
+
+    // FUNGSI BARU: Pantau GPS terus menerus (Realtime)
+    function watchGPS() {
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition((pos) => {
+                currentLat = pos.coords.latitude;
+                currentLon = pos.coords.longitude;
+                gpsStatus.innerHTML = `🛰️ GPS Aktif: ${currentLat.toFixed(5)}, ${currentLon.toFixed(5)}`;
+                gpsStatus.style.color = "#27ae60";
+            }, (err) => {
+                gpsStatus.innerHTML = "⚠️ GPS Error: " + err.message;
+                gpsStatus.style.color = "#e74c3c";
+            }, { 
+                enableHighAccuracy: true, 
+                maximumAge: 0 
+            });
+        }
+    }
 
     function startScan() {
         html5QrCode.start(
             { facingMode: "environment" }, 
             { fps: 10, qrbox: 250 },
             onScanSuccess
-        ).catch(err => {
-            statusDiv.innerHTML = "❌ Kamera tidak dapat diakses.";
-        });
+        );
     }
 
     async function onScanSuccess(decodedText) {
-        // 1. Langsung matikan scanner agar tidak double
+        if (currentLat === null) {
+            alert("Tunggu sampai GPS terkunci (Indikator Hijau)!");
+            return;
+        }
+
         await html5QrCode.stop();
-        statusDiv.innerHTML = "⏳ <b>Menunggu GPS...</b> (Mohon jangan pindah halaman)";
+        statusDiv.innerHTML = "⏳ Mengirim data lokasi terbaru...";
 
-        // 2. Ambil lokasi GPS (Paksa Akurasi Tinggi & Lokasi Baru)
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-            const lat = pos.coords.latitude;
-            const lon = pos.coords.longitude;
-            const linkMap = `https://www.google.com/maps?q=${lat},${lon}`;
-            const nama = document.getElementById("personil").value;
+        const linkMap = `https://www.google.com/maps?q=${currentLat},${currentLon}`;
+        const nama = document.getElementById("personil").value;
 
-            statusDiv.innerHTML = "⏳ <b>Lokasi terkunci!</b> Mengirim data ke Sheets...";
-
-            // 3. Kirim ke Google Apps Script Anda
-            try {
-                await fetch("https://script.google.com/macros/s/AKfycbzISsPsXdRsExjLVZEpul0Bt1cBKtoDZbdZtMtLpPw-wc5YsW1RZU39lE3EvLoFo7w/exec", {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        personil: nama,
-                        cekpoin: decodedText,
-                        lokasi: linkMap
-                    })
-                });
-                
-                statusDiv.innerHTML = `
-                    <b style="color:green">✅ DATA BERHASIL DISIMPAN</b><br>
-                    Cekpoin: ${decodedText}<br>
-                    Waktu: ${new Date().toLocaleString('id-ID')}
-                `;
-                document.getElementById("btn-next").style.display = "block";
-            } catch (e) {
-                statusDiv.innerHTML = "❌ Gagal mengirim ke Google Sheets.";
-                console.error(e);
-            }
-        }, (err) => {
-            alert("Gagal mengambil GPS! Pastikan GPS HP Aktif dan pilih 'Akurasi Tinggi'.");
-            location.reload();
-        }, { 
-            enableHighAccuracy: true, // Paksa pakai Satelit
-            timeout: 15000,           // Tunggu maksimal 15 detik
-            maximumAge: 0             // Larang pakai lokasi lama (Cache)
-        });
+        try {
+            await fetch("https://script.google.com/macros/s/AKfycbzISsPsXdRsExjLVZEpul0Bt1cBKtoDZbdZtMtLpPw-wc5YsW1RZU39lE3EvLoFo7w/exec", {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify({
+                    personil: nama,
+                    cekpoin: decodedText,
+                    lokasi: linkMap
+                })
+            });
+            
+            statusDiv.innerHTML = `✅ <b>TERSIMPAN!</b><br>Lokasi: ${currentLat}, ${currentLon}`;
+            document.getElementById("btn-next").style.display = "block";
+        } catch (e) {
+            statusDiv.innerHTML = "❌ Gagal kirim. Cek koneksi internet.";
+        }
     }
 
-    // Jalankan scanner otomatis
+    // Jalankan GPS & Scanner
+    watchGPS();
     startScan();
 </script>
 </body>
