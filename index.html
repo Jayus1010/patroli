@@ -10,10 +10,11 @@
         .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         #reader { width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 20px; background: #000; }
         .form-group { text-align: left; margin-bottom: 20px; }
-        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; outline: none; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
+        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; outline: none; background-color: #fff; }
         #scan-again-area { display:none; padding: 20px; background: #e8f5e9; border-radius: 10px; margin-bottom: 15px; border: 1px solid #c8e6c9; }
         button { background: #007bff; color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
-        .log-entry { background: #fff; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-top: 10px; text-align: left; font-size: 14px; }
+        .log-entry { background: #fff; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-top: 10px; text-align: left; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .status-loading { color: #f39c12; font-weight: bold; }
     </style>
 </head>
@@ -23,19 +24,27 @@
         <h2>🛡️ Sistem Patroli</h2>
         
         <div class="form-group">
-            <label><b>Nama Personil:</b></label>
+            <label>Pilih Nama Personil:</label>
             <select id="personil">
-                <option value="Agus">Agus</option>
-                <option value="Budi">Budi</option>
-                <option value="Setyo">Setyo</option>
-                <option value="Dedi">Dedi</option>
+                <option value="Ansori">Ansori</option>
+                <option value="Mustofa">Mustofa</option>
+                <option value="Ja'far Sodik">Ja'far Sodik</option>
+                <option value="Yusuf">Yusuf</option>
+                <option value="Abdul Rochim">Abdul Rochim</option>
+                <option value="M. Syaiful Rizal">M. Syaiful Rizal</option>
+                <option value="Akhmad Kholil">Akhmad Kholil</option>
+                <option value="Moh Sudi">Moh Sudi</option>
+                <option value="Saeri">Saeri</option>
+                <option value="Buhar">Buhar</option>
+                <option value="Moh. Ainul Yakin">Moh. Ainul Yakin</option>
+                <option value="Pangestu">Pangestu</option>
             </select>
         </div>
 
         <div id="reader"></div>
 
         <div id="scan-again-area">
-            <p style="color: #2e7d32; font-weight: bold;">✅ Berhasil Dicatat!</p>
+            <p style="color: #2e7d32; font-weight: bold;">✅ Scan Berhasil!</p>
             <button onclick="restartScanner()">Scan Cekpoin Berikutnya</button>
         </div>
         
@@ -58,7 +67,7 @@
             const personil = document.getElementById('personil').value;
             const resultDiv = document.getElementById('scanned-result');
             
-            // Berhenti Scan agar tidak double
+            // Matikan scanner agar tidak double scan
             html5QrcodeScanner.clear();
             
             // Tampilkan status loading GPS
@@ -69,7 +78,7 @@
             if (resultDiv.firstChild && resultDiv.firstChild.tagName === 'P') resultDiv.innerHTML = '';
             resultDiv.insertBefore(loadingMsg, resultDiv.firstChild);
 
-            // Ambil GPS
+            // Ambil GPS dengan Akurasi Tinggi
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((position) => {
                     const lat = position.coords.latitude;
@@ -89,6 +98,7 @@
         function kirimData(nama, cekpoin, gps) {
             document.getElementById('scan-again-area').style.display = 'block';
 
+            // Mengirim data ke URL AppScript Anda
             fetch("https://script.google.com/macros/s/AKfycbzISsPsXdRsExjLVZEpul0Bt1cBKtoDZbdZtMtLpPw-wc5YsW1RZU39lE3EvLoFo7w/exec", {
                 method: "POST",
                 mode: "no-cors",
@@ -102,11 +112,11 @@
                 const tempLog = document.getElementById('temp-log');
                 const waktu = new Date().toLocaleString('id-ID');
                 tempLog.className = "log-entry";
-                tempLog.id = ""; // Hapus ID temp
+                tempLog.id = ""; 
                 tempLog.innerHTML = `
                     <b style="color:#2e7d32">✅ TERSIMPAN</b><br>
                     <b>${cekpoin}</b> oleh ${nama}<br>
-                    <small>📍 <a href="${gps}" target="_blank">Lihat Lokasi</a></small><br>
+                    <small>📍 <a href="${gps}" target="_blank">Lihat Lokasi di Peta</a></small><br>
                     <small>⏰ ${waktu}</small>
                 `;
             });
@@ -119,10 +129,10 @@
         }
 
         function startScanner() {
+            // Hanya menggunakan kamera (mencegah upload foto curang)
             html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
                 fps: 10, 
                 qrbox: 250,
-                // Menonaktifkan fitur upload file agar tidak bisa scan foto dari galeri
                 supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
             });
             html5QrcodeScanner.render(onScanSuccess);
