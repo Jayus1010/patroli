@@ -8,7 +8,6 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
-        /* Bagian ini untuk mengatur tampilan (Baju aplikasi) */
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             text-align: center; 
@@ -39,7 +38,6 @@
             border-bottom: 1px solid #ddd;
             font-size: 14px;
         }
-        .success-text { color: #2ecc71; font-weight: bold; }
         h2 { color: #2c3e50; }
     </style>
 </head>
@@ -60,52 +58,46 @@
     </div>
 
     <script>
-        // Bagian ini adalah Logika Aplikasi (Otak)
-        
-        <script>
-    function onScanSuccess(decodedText, decodedResult) {
-        const waktu = new Date().toLocaleString('id-ID');
-        
-        // 1. Tampilkan di layar HP dulu
-        const resultDiv = document.getElementById('scanned-result');
-        const newLog = document.createElement("div");
-        newLog.className = "log-entry";
-        newLog.innerHTML = `⏳ Mengirim: <b>${decodedText}</b>...`;
-        resultDiv.insertBefore(newLog, resultDiv.firstChild);
+        function onScanSuccess(decodedText, decodedResult) {
+            const waktu = new Date().toLocaleString('id-ID');
+            
+            // 1. Tampilkan status di layar HP
+            const resultDiv = document.getElementById('scanned-result');
+            const newLog = document.createElement("div");
+            newLog.className = "log-entry";
+            newLog.innerHTML = `⏳ Mengirim: <b>${decodedText}</b>...`;
+            
+            if (resultDiv.firstChild && resultDiv.firstChild.tagName === 'P') {
+                resultDiv.innerHTML = '';
+            }
+            resultDiv.insertBefore(newLog, resultDiv.firstChild);
 
-        // 2. KIRIM KE GOOGLE SHEETS
-        fetch("https://script.google.com/macros/s/AKfycbzISsPsXdRsExjLVZEpul0Bt1cBKtoDZbdZtMtLpPw-wc5YsW1RZU39lE3EvLoFo7w/exec", {
-            method: "POST",
-            body: JSON.stringify({ "cekpoin": decodedText })
-        })
-        .then(res => {
-            newLog.innerHTML = `✅ <b>${decodedText}</b> <br> <small>${waktu} (Tersimpan)</small>`;
-            alert("Data Cekpoin Berhasil Dikirim ke Google Sheets!");
-        })
-        .catch(err => {
-            newLog.innerHTML = `❌ Gagal Simpan: <b>${decodedText}</b>`;
-            console.error(err);
-        });
-    }
-
-    let html5QrcodeScanner = new Html5QrcodeScanner(
-        "reader", { fps: 10, qrbox: { width: 250, height: 250 } }
-    );
-    html5QrcodeScanner.render(onScanSuccess);
-</script>
+            // 2. KIRIM KE GOOGLE SHEETS
+            // Menggunakan link Google Script Anda
+            fetch("https://script.google.com/macros/s/AKfycbzISsPsXdRsExjLVZEpul0Bt1cBKtoDZbdZtMtLpPw-wc5YsW1RZU39lE3EvLoFo7w/exec", {
+                method: "POST",
+                mode: "no-cors", // Penting untuk menghindari error keamanan browser
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ "cekpoin": decodedText })
+            })
+            .then(() => {
+                newLog.innerHTML = `✅ <b>${decodedText}</b> <br> <small>${waktu} (Tersimpan)</small>`;
+            })
+            .catch(err => {
+                newLog.innerHTML = `❌ Gagal Simpan: <b>${decodedText}</b>`;
+                console.error(err);
+            });
         }
 
         function onScanFailure(error) {
-            // Abaikan error jika kamera tidak menemukan barcode dalam sekejap
+            // Abaikan error deteksi
         }
 
-        // Jalankan Scanner
+        // Jalankan Scanner hanya satu kali di sini
         let html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader", 
-            { 
-                fps: 10,       // Kecepatan kamera menangkap gambar
-                qrbox: { width: 250, height: 250 } // Ukuran kotak fokus scan
-            }
+            "reader", { fps: 10, qrbox: { width: 250, height: 250 } }
         );
         html5QrcodeScanner.render(onScanSuccess, onScanFailure);
     </script>
