@@ -3,168 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Patroli Terpadu</title>
+    <title>Patroli Security - JAPFA</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root {
-            /* Warna berdasarkan Corporate Guideline */
-            --brand-navy: #1a2a40; 
+            --japfa-navy: #002D62; 
+            --japfa-red: #E31E24;
             --brand-gold: #c5a059;
-            --brand-light: #f4f7f6;
-            --brand-white: #ffffff;
+            --bg-light: #f4f7f6;
         }
 
         body { 
-            font-family: 'Montserrat', 'Segoe UI', sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background: var(--brand-light); 
-            display: flex;
-            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; padding: 0; background: var(--bg-light); 
+            display: flex; justify-content: center;
         }
 
         .app-container {
-            width: 100%;
-            max-width: 480px;
-            background: var(--brand-white);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            width: 100%; max-width: 480px; background: white;
+            min-height: 100vh; display: flex; flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
 
-        /* Header Profesional sesuai Identity Guideline */
         .header {
-            background: var(--brand-navy);
-            color: var(--brand-white);
-            padding: 40px 20px;
-            text-align: center;
-            border-bottom: 5px solid var(--brand-gold);
-            border-bottom-left-radius: 30px;
-            border-bottom-right-radius: 30px;
+            background: var(--japfa-navy); color: white;
+            padding: 30px 20px; text-align: center;
+            border-bottom: 4px solid var(--japfa-red);
+            border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;
         }
 
-        .logo-area {
-            width: 90px;
-            height: 90px;
-            background: var(--brand-white);
-            border-radius: 18px; /* Mengikuti gaya modern di guideline */
-            margin: 0 auto 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .logo-box {
+            width: 120px; background: white; border-radius: 12px;
+            margin: 0 auto 15px; padding: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            padding: 10px;
         }
 
-        .logo-area img {
-            max-width: 100%;
-            height: auto;
-        }
+        .logo-box img { width: 100%; height: auto; }
 
-        .header h1 {
-            font-size: 18px;
-            margin: 5px 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 700;
-        }
+        .header h1 { font-size: 18px; margin: 5px 0; text-transform: uppercase; letter-spacing: 1px; }
 
-        .header p {
-            font-size: 12px;
-            margin: 0;
-            opacity: 0.8;
-            letter-spacing: 1px;
-        }
+        .main-content { padding: 25px 20px; flex-grow: 1; }
 
-        .main-content {
-            padding: 25px 20px;
-            flex-grow: 1;
-        }
+        .input-group { margin-bottom: 20px; text-align: left; }
 
-        /* Styling Input & Card */
-        .input-group {
-            margin-bottom: 25px;
-            text-align: left;
-        }
-
-        label {
-            font-size: 12px;
-            font-weight: bold;
-            color: var(--brand-navy);
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            display: block;
-            letter-spacing: 1px;
-        }
+        label { font-size: 12px; font-weight: bold; color: var(--japfa-navy); text-transform: uppercase; margin-bottom: 8px; display: block; }
 
         select {
-            width: 100%;
-            padding: 15px;
-            border-radius: 12px;
-            border: 2px solid #e0e0e0;
-            font-size: 16px;
-            color: var(--brand-navy);
-            background: #fff;
-            outline: none;
-            transition: border-color 0.3s;
+            width: 100%; padding: 15px; border-radius: 10px;
+            border: 2px solid #ddd; font-size: 16px; color: var(--japfa-navy);
+            background: #fff; outline: none;
         }
 
-        select:focus {
-            border-color: var(--brand-gold);
-        }
+        #reader { width: 100%; border-radius: 15px; overflow: hidden; border: none !important; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
-        /* Scanner Area */
-        #reader { 
-            width: 100%; 
-            border-radius: 20px; 
-            overflow: hidden; 
-            border: none !important;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-
-        /* Tombol Aksi */
         .btn-action {
-            display: none;
-            width: 100%;
-            padding: 18px;
-            background: var(--brand-navy);
-            color: var(--brand-gold);
-            border: 2px solid var(--brand-gold);
-            border-radius: 12px;
-            font-weight: 800;
-            font-size: 14px;
-            cursor: pointer;
-            text-transform: uppercase;
-            margin-top: 20px;
-            letter-spacing: 1px;
-            transition: all 0.3s;
+            display: none; width: 100%; padding: 18px;
+            background: var(--japfa-navy); color: white;
+            border: none; border-radius: 10px; font-weight: bold;
+            font-size: 15px; text-transform: uppercase; margin-top: 20px;
         }
 
-        .btn-action:active {
-            transform: scale(0.98);
-            background: var(--brand-gold);
-            color: var(--brand-navy);
-        }
-
-        /* Status Box */
         #status-display {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 13px;
-            line-height: 1.6;
-            background: #fdfdfd;
-            border: 1px dashed #ccc;
-            color: #555;
-        }
-
-        .footer-note {
-            padding: 20px;
-            font-size: 10px;
-            color: #aaa;
-            text-align: center;
-            text-transform: uppercase;
+            margin-top: 15px; padding: 15px; border-radius: 10px;
+            font-size: 13px; background: #f9f9f9; border-left: 5px solid #ccc;
         }
     </style>
 </head>
@@ -172,16 +73,16 @@
 
 <div class="app-container">
     <div class="header">
-        <div class="logo-area">
-            <img src="https://cdn-icons-png.flaticon.com/512/582/582761.png" alt="Corporate Logo">
+        <div class="logo-box">
+            <img src="https://upload.wikimedia.org/wikipedia/id/thumb/a/a2/Japfa_Comfeed_Indonesia_logo.svg/1200px-Japfa_Comfeed_Indonesia_logo.svg.png" alt="Japfa Logo">
         </div>
         <h1>Security Patrol</h1>
-        <p>Identity & Protection System</p>
+        <p>Unit Probolinggo</p>
     </div>
 
     <div class="main-content">
         <div class="input-group">
-            <label>Authorized Personnel</label>
+            <label>Pilih Petugas:</label>
             <select id="personil">
                 <option value="Ansori">Ansori</option>
                 <option value="Mustofa">Mustofa</option>
@@ -200,13 +101,9 @@
 
         <div id="reader"></div>
 
-        <button id="btn-next" class="btn-action" onclick="location.reload()">Proceed to Next Point</button>
+        <button id="btn-next" class="btn-action" onclick="location.reload()">✅ Scan Selanjutnya</button>
         
-        <div id="status-display">Ready for scanning. Please ensure GPS is enabled for verification.</div>
-    </div>
-
-    <div class="footer-note">
-        &copy; 2026 Corporate Identity Protected System
+        <div id="status-display">Siap melakukan pemindaian...</div>
     </div>
 </div>
 
@@ -214,14 +111,14 @@
     const html5QrCode = new Html5Qrcode("reader");
     const statusDisplay = document.getElementById("status-display");
 
-    function initScanner() {
-        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScanDone);
+    function startApp() {
+        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScan);
     }
 
-    function onScanDone(decodedText) {
+    function onScan(decodedText) {
         html5QrCode.stop();
-        statusDisplay.innerHTML = "<b>[SYSTEM]</b> Locking GPS coordinates... Please hold.";
-        statusDisplay.style.color = "#c5a059";
+        statusDisplay.style.borderLeftColor = "#f1c40f";
+        statusDisplay.innerHTML = "<b>⏳ MENGUNCI LOKASI...</b><br>Mohon tunggu sebentar.";
 
         navigator.geolocation.getCurrentPosition(function(pos) {
             const lat = pos.coords.latitude;
@@ -234,20 +131,19 @@
                 mode: "no-cors",
                 body: JSON.stringify({ personil: user, cekpoin: decodedText, lokasi: mapLink })
             }).then(() => {
-                statusDisplay.style.background = "#1a2a40";
-                statusDisplay.style.color = "#c5a059";
-                statusDisplay.style.border = "1px solid #c5a059";
-                statusDisplay.innerHTML = `<b>SUCCESS</b><br>Point: ${decodedText}<br>Verified at: ${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                statusDisplay.style.borderLeftColor = "#27ae60";
+                statusDisplay.style.background = "#e8f5e9";
+                statusDisplay.innerHTML = `<b>✅ BERHASIL DISIMPAN</b><br>Petugas: ${user}<br>Lokasi: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
                 document.getElementById("btn-next").style.display = "block";
             });
 
         }, function(err) {
-            alert("Location access denied. System requires GPS for authentication.");
+            alert("Akses GPS ditolak! Aplikasi memerlukan lokasi untuk validasi.");
             location.reload();
         }, { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 });
     }
 
-    initScanner();
+    startApp();
 </script>
 </body>
 </html>
