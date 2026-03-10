@@ -3,142 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patroli Security PRO - GPS Verified</title>
+    <title>Aplikasi Patroli Security - Versi GPS Akurat</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; background-color: #f0f2f5; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        #reader { width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 20px; background: #000; }
-        .form-group { text-align: left; margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
-        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; outline: none; background-color: #fff; }
-        #scan-again-area { display:none; padding: 20px; background: #e8f5e9; border-radius: 10px; margin-bottom: 15px; border: 1px solid #c8e6c9; }
-        button { background: #007bff; color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
-        .log-entry { background: #fff; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-top: 10px; text-align: left; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .status-loading { color: #f39c12; font-weight: bold; }
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; background: #f4f7f6; }
+        .container { max-width: 450px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        #reader { width: 100%; border-radius: 10px; overflow: hidden; background: #000; }
+        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; margin-bottom: 15px; }
+        #btn-next { display:none; width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 8px; margin-top: 15px; font-weight: bold; font-size: 16px; }
+        .log-status { margin-top: 15px; font-size: 14px; color: #555; text-align: left; padding: 10px; border-top: 1px solid #eee; }
+        h2 { color: #333; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>🛡️ Sistem Patroli</h2>
-        
-        <div class="form-group">
-            <label>Pilih Nama Personil:</label>
-            <select id="personil">
-                <option value="Ansori">Ansori</option>
-                <option value="Mustofa">Mustofa</option>
-                <option value="Ja'far Sodik">Ja'far Sodik</option>
-                <option value="Yusuf">Yusuf</option>
-                <option value="Abdul Rochim">Abdul Rochim</option>
-                <option value="M. Syaiful Rizal">M. Syaiful Rizal</option>
-                <option value="Akhmad Kholil">Akhmad Kholil</option>
-                <option value="Moh Sudi">Moh Sudi</option>
-                <option value="Saeri">Saeri</option>
-                <option value="Buhar">Buhar</option>
-                <option value="Moh. Ainul Yakin">Moh. Ainul Yakin</option>
-                <option value="Pangestu">Pangestu</option>
-            </select>
-        </div>
+<div class="container">
+    <h2>🛡️ Patroli Probolinggo</h2>
+    <p>Pilih nama Anda sebelum scan:</p>
+    <select id="personil">
+        <option value="Ansori">Ansori</option>
+        <option value="Mustofa">Mustofa</option>
+        <option value="Ja'far Sodik">Ja'far Sodik</option>
+        <option value="Yusuf">Yusuf</option>
+        <option value="Abdul Rochim">Abdul Rochim</option>
+        <option value="M. Syaiful Rizal">M. Syaiful Rizal</option>
+        <option value="Akhmad Kholil">Akhmad Kholil</option>
+        <option value="Moh Sudi">Moh Sudi</option>
+        <option value="Saeri">Saeri</option>
+        <option value="Buhar">Buhar</option>
+        <option value="Moh. Ainul Yakin">Moh. Ainul Yakin</option>
+        <option value="Pangestu">Pangestu</option>
+    </select>
 
-        <div id="reader"></div>
+    <div id="reader"></div>
+    <button id="btn-next" onclick="location.reload()">Scan Cekpoin Selanjutnya</button>
+    <div id="status" class="log-status">Menunggu Scan...</div>
+</div>
 
-        <div id="scan-again-area">
-            <p style="color: #2e7d32; font-weight: bold;">✅ Scan Berhasil!</p>
-            <button onclick="restartScanner()">Scan Cekpoin Berikutnya</button>
-        </div>
-        
-        <div id="result-section">
-            <h4>Riwayat Scan:</h4>
-            <div id="scanned-result">
-                <p style="color: #999;">Belum ada aktivitas.</p>
-            </div>
-        </div>
-    </div>
+<script>
+    const html5QrCode = new Html5Qrcode("reader");
+    const statusDiv = document.getElementById("status");
 
-    <script>
-        let html5QrcodeScanner;
-        let isScanning = true;
+    function startScan() {
+        html5QrCode.start(
+            { facingMode: "environment" }, 
+            { fps: 10, qrbox: 250 },
+            onScanSuccess
+        ).catch(err => {
+            statusDiv.innerHTML = "❌ Kamera tidak dapat diakses.";
+        });
+    }
 
-        function onScanSuccess(decodedText, decodedResult) {
-            if (!isScanning) return;
-            isScanning = false;
+    async function onScanSuccess(decodedText) {
+        // 1. Langsung matikan scanner agar tidak double
+        await html5QrCode.stop();
+        statusDiv.innerHTML = "⏳ <b>Menunggu GPS...</b> (Mohon jangan pindah halaman)";
 
-            const personil = document.getElementById('personil').value;
-            const resultDiv = document.getElementById('scanned-result');
-            
-            // Matikan scanner agar tidak double scan
-            html5QrcodeScanner.clear();
-            
-            // Tampilkan status loading GPS
-            const loadingMsg = document.createElement("div");
-            loadingMsg.className = "log-entry status-loading";
-            loadingMsg.id = "temp-log";
-            loadingMsg.innerHTML = `⏳ Mendapatkan Lokasi GPS...`;
-            if (resultDiv.firstChild && resultDiv.firstChild.tagName === 'P') resultDiv.innerHTML = '';
-            resultDiv.insertBefore(loadingMsg, resultDiv.firstChild);
+        // 2. Ambil lokasi GPS (Paksa Akurasi Tinggi & Lokasi Baru)
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            const linkMap = `https://www.google.com/maps?q=${lat},${lon}`;
+            const nama = document.getElementById("personil").value;
 
-            // Ambil GPS dengan Akurasi Tinggi
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    const gpsLink = `https://www.google.com/maps?q=${lat},${lon}`;
-                    
-                    kirimData(personil, decodedText, gpsLink);
-                }, (error) => {
-                    alert("GPS Gagal: " + error.message + ". Pastikan GPS HP aktif!");
-                    restartScanner();
-                }, { enableHighAccuracy: true });
-            } else {
-                alert("HP tidak mendukung GPS.");
-            }
-        }
+            statusDiv.innerHTML = "⏳ <b>Lokasi terkunci!</b> Mengirim data ke Sheets...";
 
-        function kirimData(nama, cekpoin, gps) {
-            document.getElementById('scan-again-area').style.display = 'block';
-
-            // Mengirim data ke URL AppScript Anda
-            fetch("https://script.google.com/macros/s/AKfycbzISsPsXdRsExjLVZEpul0Bt1cBKtoDZbdZtMtLpPw-wc5YsW1RZU39lE3EvLoFo7w/exec", {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    "personil": nama, 
-                    "cekpoin": cekpoin, 
-                    "lokasi": gps 
-                })
-            }).then(() => {
-                const tempLog = document.getElementById('temp-log');
-                const waktu = new Date().toLocaleString('id-ID');
-                tempLog.className = "log-entry";
-                tempLog.id = ""; 
-                tempLog.innerHTML = `
-                    <b style="color:#2e7d32">✅ TERSIMPAN</b><br>
-                    <b>${cekpoin}</b> oleh ${nama}<br>
-                    <small>📍 <a href="${gps}" target="_blank">Lihat Lokasi di Peta</a></small><br>
-                    <small>⏰ ${waktu}</small>
+            // 3. Kirim ke Google Apps Script Anda
+            try {
+                await fetch("https://script.google.com/macros/s/AKfycbzISsPsXdRsExjLVZEpul0Bt1cBKtoDZbdZtMtLpPw-wc5YsW1RZU39lE3EvLoFo7w/exec", {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        personil: nama,
+                        cekpoin: decodedText,
+                        lokasi: linkMap
+                    })
+                });
+                
+                statusDiv.innerHTML = `
+                    <b style="color:green">✅ DATA BERHASIL DISIMPAN</b><br>
+                    Cekpoin: ${decodedText}<br>
+                    Waktu: ${new Date().toLocaleString('id-ID')}
                 `;
-            });
-        }
+                document.getElementById("btn-next").style.display = "block";
+            } catch (e) {
+                statusDiv.innerHTML = "❌ Gagal mengirim ke Google Sheets.";
+                console.error(e);
+            }
+        }, (err) => {
+            alert("Gagal mengambil GPS! Pastikan GPS HP Aktif dan pilih 'Akurasi Tinggi'.");
+            location.reload();
+        }, { 
+            enableHighAccuracy: true, // Paksa pakai Satelit
+            timeout: 15000,           // Tunggu maksimal 15 detik
+            maximumAge: 0             // Larang pakai lokasi lama (Cache)
+        });
+    }
 
-        function restartScanner() {
-            isScanning = true;
-            document.getElementById('scan-again-area').style.display = 'none';
-            startScanner();
-        }
-
-        function startScanner() {
-            // Hanya menggunakan kamera (mencegah upload foto curang)
-            html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-                fps: 10, 
-                qrbox: 250,
-                supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-            });
-            html5QrcodeScanner.render(onScanSuccess);
-        }
-
-        startScanner();
-    </script>
+    // Jalankan scanner otomatis
+    startScan();
+</script>
 </body>
 </html>
