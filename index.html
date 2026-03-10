@@ -62,22 +62,37 @@
     <script>
         // Bagian ini adalah Logika Aplikasi (Otak)
         
-        function onScanSuccess(decodedText, decodedResult) {
-            // 1. Ambil waktu saat ini
-            const waktu = new Date().toLocaleString('id-ID');
-            
-            // 2. Buat catatan baru
-            const resultDiv = document.getElementById('scanned-result');
-            const newLog = document.createElement("div");
-            newLog.className = "log-entry";
-            newLog.innerHTML = `✅ <b>${decodedText}</b> <br> <small>${waktu}</small>`;
-            
-            // 3. Masukkan ke daftar paling atas
-            if (resultDiv.firstChild.tagName === 'P') resultDiv.innerHTML = '';
-            resultDiv.insertBefore(newLog, resultDiv.firstChild);
+        <script>
+    function onScanSuccess(decodedText, decodedResult) {
+        const waktu = new Date().toLocaleString('id-ID');
+        
+        // 1. Tampilkan di layar HP dulu
+        const resultDiv = document.getElementById('scanned-result');
+        const newLog = document.createElement("div");
+        newLog.className = "log-entry";
+        newLog.innerHTML = `⏳ Mengirim: <b>${decodedText}</b>...`;
+        resultDiv.insertBefore(newLog, resultDiv.firstChild);
 
-            // 4. Notifikasi sederhana
-            alert("Berhasil Scan: " + decodedText);
+        // 2. KIRIM KE GOOGLE SHEETS
+        fetch("https://script.google.com/macros/s/AKfycbzISsPsXdRsExjLVZEpul0Bt1cBKtoDZbdZtMtLpPw-wc5YsW1RZU39lE3EvLoFo7w/exec", {
+            method: "POST",
+            body: JSON.stringify({ "cekpoin": decodedText })
+        })
+        .then(res => {
+            newLog.innerHTML = `✅ <b>${decodedText}</b> <br> <small>${waktu} (Tersimpan)</small>`;
+            alert("Data Cekpoin Berhasil Dikirim ke Google Sheets!");
+        })
+        .catch(err => {
+            newLog.innerHTML = `❌ Gagal Simpan: <b>${decodedText}</b>`;
+            console.error(err);
+        });
+    }
+
+    let html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader", { fps: 10, qrbox: { width: 250, height: 250 } }
+    );
+    html5QrcodeScanner.render(onScanSuccess);
+</script>
         }
 
         function onScanFailure(error) {
