@@ -3,104 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Patroli Security</title>
-    
+    <title>Patroli Security PRO - GPS Verified</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
-
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            text-align: center; 
-            padding: 20px; 
-            background-color: #eef2f3; 
-        }
-        .container {
-            max-width: 500px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        #reader { 
-            width: 100%; 
-            border-radius: 10px; 
-            overflow: hidden;
-            border: none !important;
-        }
-        #result-section { 
-            margin-top: 20px; 
-            text-align: left;
-        }
-        .log-entry {
-            background: #f9f9f9;
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            font-size: 14px;
-        }
-        h2 { color: #2c3e50; }
+        body { font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; background-color: #f0f2f5; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        #reader { width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 20px; background: #000; }
+        .form-group { text-align: left; margin-bottom: 20px; }
+        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; outline: none; }
+        #scan-again-area { display:none; padding: 20px; background: #e8f5e9; border-radius: 10px; margin-bottom: 15px; border: 1px solid #c8e6c9; }
+        button { background: #007bff; color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
+        .log-entry { background: #fff; padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-top: 10px; text-align: left; font-size: 14px; }
+        .status-loading { color: #f39c12; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>🛡️ Patroli Security</h2>
-        <p>Arahkan kamera ke Barcode cekpoin</p>
+        <h2>🛡️ Sistem Patroli</h2>
         
+        <div class="form-group">
+            <label><b>Nama Personil:</b></label>
+            <select id="personil">
+                <option value="Agus">Agus</option>
+                <option value="Budi">Budi</option>
+                <option value="Setyo">Setyo</option>
+                <option value="Dedi">Dedi</option>
+            </select>
+        </div>
+
         <div id="reader"></div>
+
+        <div id="scan-again-area">
+            <p style="color: #2e7d32; font-weight: bold;">✅ Berhasil Dicatat!</p>
+            <button onclick="restartScanner()">Scan Cekpoin Berikutnya</button>
+        </div>
         
         <div id="result-section">
             <h4>Riwayat Scan:</h4>
             <div id="scanned-result">
-                <p style="color: #999;">Belum ada data scan...</p>
+                <p style="color: #999;">Belum ada aktivitas.</p>
             </div>
         </div>
     </div>
 
     <script>
-        function onScanSuccess(decodedText, decodedResult) {
-            const waktu = new Date().toLocaleString('id-ID');
-            
-            // 1. Tampilkan status di layar HP
-            const resultDiv = document.getElementById('scanned-result');
-            const newLog = document.createElement("div");
-            newLog.className = "log-entry";
-            newLog.innerHTML = `⏳ Mengirim: <b>${decodedText}</b>...`;
-            
-            if (resultDiv.firstChild && resultDiv.firstChild.tagName === 'P') {
-                resultDiv.innerHTML = '';
-            }
-            resultDiv.insertBefore(newLog, resultDiv.firstChild);
+        let html5QrcodeScanner;
+        let isScanning = true;
 
-            // 2. KIRIM KE GOOGLE SHEETS
-            // Menggunakan link Google Script Anda
+        function onScanSuccess(decodedText, decodedResult) {
+            if (!isScanning) return;
+            isScanning = false;
+
+            const personil = document.getElementById('personil').value;
+            const resultDiv = document.getElementById('scanned-result');
+            
+            // Berhenti Scan agar tidak double
+            html5QrcodeScanner.clear();
+            
+            // Tampilkan status loading GPS
+            const loadingMsg = document.createElement("div");
+            loadingMsg.className = "log-entry status-loading";
+            loadingMsg.id = "temp-log";
+            loadingMsg.innerHTML = `⏳ Mendapatkan Lokasi GPS...`;
+            if (resultDiv.firstChild && resultDiv.firstChild.tagName === 'P') resultDiv.innerHTML = '';
+            resultDiv.insertBefore(loadingMsg, resultDiv.firstChild);
+
+            // Ambil GPS
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const gpsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                    
+                    kirimData(personil, decodedText, gpsLink);
+                }, (error) => {
+                    alert("GPS Gagal: " + error.message + ". Pastikan GPS HP aktif!");
+                    restartScanner();
+                }, { enableHighAccuracy: true });
+            } else {
+                alert("HP tidak mendukung GPS.");
+            }
+        }
+
+        function kirimData(nama, cekpoin, gps) {
+            document.getElementById('scan-again-area').style.display = 'block';
+
             fetch("https://script.google.com/macros/s/AKfycbzISsPsXdRsExjLVZEpul0Bt1cBKtoDZbdZtMtLpPw-wc5YsW1RZU39lE3EvLoFo7w/exec", {
                 method: "POST",
-                mode: "no-cors", // Penting untuk menghindari error keamanan browser
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ "cekpoin": decodedText })
-            })
-            .then(() => {
-                newLog.innerHTML = `✅ <b>${decodedText}</b> <br> <small>${waktu} (Tersimpan)</small>`;
-            })
-            .catch(err => {
-                newLog.innerHTML = `❌ Gagal Simpan: <b>${decodedText}</b>`;
-                console.error(err);
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    "personil": nama, 
+                    "cekpoin": cekpoin, 
+                    "lokasi": gps 
+                })
+            }).then(() => {
+                const tempLog = document.getElementById('temp-log');
+                const waktu = new Date().toLocaleString('id-ID');
+                tempLog.className = "log-entry";
+                tempLog.id = ""; // Hapus ID temp
+                tempLog.innerHTML = `
+                    <b style="color:#2e7d32">✅ TERSIMPAN</b><br>
+                    <b>${cekpoin}</b> oleh ${nama}<br>
+                    <small>📍 <a href="${gps}" target="_blank">Lihat Lokasi</a></small><br>
+                    <small>⏰ ${waktu}</small>
+                `;
             });
         }
 
-        function onScanFailure(error) {
-            // Abaikan error deteksi
+        function restartScanner() {
+            isScanning = true;
+            document.getElementById('scan-again-area').style.display = 'none';
+            startScanner();
         }
 
-        // Jalankan Scanner hanya satu kali di sini
-        let html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader", { fps: 10, qrbox: { width: 250, height: 250 } }
-        );
-        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-    </script>
+        function startScanner() {
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+                fps: 10, 
+                qrbox: 250,
+                // Menonaktifkan fitur upload file agar tidak bisa scan foto dari galeri
+                supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+            });
+            html5QrcodeScanner.render(onScanSuccess);
+        }
 
+        startScanner();
+    </script>
 </body>
 </html>
