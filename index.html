@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patroli Security - JAPFA</title>
+    <title>Patroli Security - JAPFA FOOD</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root {
             --japfa-navy: #002D62; 
             --japfa-red: #E31E24;
-            --brand-gold: #c5a059;
             --bg-light: #f4f7f6;
         }
 
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
             margin: 0; padding: 0; background: var(--bg-light); 
             display: flex; justify-content: center;
         }
@@ -27,45 +26,52 @@
 
         .header {
             background: var(--japfa-navy); color: white;
-            padding: 30px 20px; text-align: center;
-            border-bottom: 4px solid var(--japfa-red);
-            border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;
+            padding: 35px 20px; text-align: center;
+            border-bottom: 5px solid var(--japfa-red);
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
         }
 
         .logo-box {
-            width: 120px; background: white; border-radius: 12px;
-            margin: 0 auto 15px; padding: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            width: 140px; background: white; border-radius: 10px;
+            margin: 0 auto 15px; padding: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
-        .logo-box img { width: 100%; height: auto; }
+        .logo-box img { width: 100%; height: auto; display: block; }
 
-        .header h1 { font-size: 18px; margin: 5px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .header h1 { font-size: 18px; margin: 5px 0; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; }
+        .header p { font-size: 12px; margin: 0; opacity: 0.9; letter-spacing: 0.5px; }
 
         .main-content { padding: 25px 20px; flex-grow: 1; }
 
-        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group { margin-bottom: 25px; text-align: left; }
 
-        label { font-size: 12px; font-weight: bold; color: var(--japfa-navy); text-transform: uppercase; margin-bottom: 8px; display: block; }
+        label { font-size: 11px; font-weight: bold; color: var(--japfa-navy); text-transform: uppercase; margin-bottom: 8px; display: block; letter-spacing: 1px; }
 
         select {
-            width: 100%; padding: 15px; border-radius: 10px;
-            border: 2px solid #ddd; font-size: 16px; color: var(--japfa-navy);
-            background: #fff; outline: none;
+            width: 100%; padding: 14px; border-radius: 10px;
+            border: 2px solid #e0e0e0; font-size: 16px; color: var(--japfa-navy);
+            background: #fff; outline: none; font-weight: 600;
         }
 
-        #reader { width: 100%; border-radius: 15px; overflow: hidden; border: none !important; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        #reader { 
+            width: 100%; border-radius: 20px; overflow: hidden; 
+            border: 2px solid #eee !important; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08); 
+        }
 
         .btn-action {
             display: none; width: 100%; padding: 18px;
             background: var(--japfa-navy); color: white;
-            border: none; border-radius: 10px; font-weight: bold;
-            font-size: 15px; text-transform: uppercase; margin-top: 20px;
+            border: 2px solid var(--japfa-red); border-radius: 12px; 
+            font-weight: bold; font-size: 15px; text-transform: uppercase; 
+            margin-top: 20px; cursor: pointer;
         }
 
         #status-display {
-            margin-top: 15px; padding: 15px; border-radius: 10px;
-            font-size: 13px; background: #f9f9f9; border-left: 5px solid #ccc;
+            margin-top: 20px; padding: 15px; border-radius: 12px;
+            font-size: 13px; background: #ffffff; border: 1px dashed #ccc;
+            line-height: 1.5; color: #444;
         }
     </style>
 </head>
@@ -74,15 +80,15 @@
 <div class="app-container">
     <div class="header">
         <div class="logo-box">
-            <img src="https://upload.wikimedia.org/wikipedia/id/thumb/a/a2/Japfa_Comfeed_Indonesia_logo.svg/1200px-Japfa_Comfeed_Indonesia_logo.svg.png" alt="Japfa Logo">
+            <img src="https://i.ibb.co.com/8L8YVfPZ/Japfa-Food-Logo.png" alt="Japfa Food Logo">
         </div>
         <h1>Security Patrol</h1>
-        <p>Unit Probolinggo</p>
+        <p>Probolinggo Unit System</p>
     </div>
 
     <div class="main-content">
         <div class="input-group">
-            <label>Pilih Petugas:</label>
+            <label>Petugas Terautentikasi</label>
             <select id="personil">
                 <option value="Ansori">Ansori</option>
                 <option value="Mustofa">Mustofa</option>
@@ -101,9 +107,9 @@
 
         <div id="reader"></div>
 
-        <button id="btn-next" class="btn-action" onclick="location.reload()">✅ Scan Selanjutnya</button>
+        <button id="btn-next" class="btn-action" onclick="location.reload()">✅ Lanjutkan Patroli</button>
         
-        <div id="status-display">Siap melakukan pemindaian...</div>
+        <div id="status-display">Sistem siap. Silakan arahkan kamera ke QR Code cekpoin.</div>
     </div>
 </div>
 
@@ -117,8 +123,8 @@
 
     function onScan(decodedText) {
         html5QrCode.stop();
-        statusDisplay.style.borderLeftColor = "#f1c40f";
-        statusDisplay.innerHTML = "<b>⏳ MENGUNCI LOKASI...</b><br>Mohon tunggu sebentar.";
+        statusDisplay.innerHTML = "<b>[SISTEM]</b> Mengunci koordinat GPS... Mohon jangan berpindah tempat.";
+        statusDisplay.style.color = "#E31E24";
 
         navigator.geolocation.getCurrentPosition(function(pos) {
             const lat = pos.coords.latitude;
@@ -131,14 +137,15 @@
                 mode: "no-cors",
                 body: JSON.stringify({ personil: user, cekpoin: decodedText, lokasi: mapLink })
             }).then(() => {
-                statusDisplay.style.borderLeftColor = "#27ae60";
-                statusDisplay.style.background = "#e8f5e9";
-                statusDisplay.innerHTML = `<b>✅ BERHASIL DISIMPAN</b><br>Petugas: ${user}<br>Lokasi: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+                statusDisplay.style.background = "#002D62";
+                statusDisplay.style.color = "#ffffff";
+                statusDisplay.style.border = "1px solid #E31E24";
+                statusDisplay.innerHTML = `<b>BERHASIL DISIMPAN</b><br>Lokasi: ${decodedText}<br>Koordinat: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
                 document.getElementById("btn-next").style.display = "block";
             });
 
         }, function(err) {
-            alert("Akses GPS ditolak! Aplikasi memerlukan lokasi untuk validasi.");
+            alert("Akses GPS diperlukan untuk validasi patroli.");
             location.reload();
         }, { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 });
     }
