@@ -3,168 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patroli Security - JAPFA</title>
+    <title>Patroli JAPFA - Probolinggo</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        :root {
-            --japfa-navy: #002D62; 
-            --japfa-red: #E31E24;
-            --bg-light: #f4f7f6;
-        }
-
-        body { 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            margin: 0; padding: 0; background: var(--bg-light); 
-            display: flex; justify-content: center;
-        }
-
-        .app-container {
-            width: 100%; max-width: 480px; background: white;
-            min-height: 100vh; display: flex; flex-direction: column;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-
-        /* Header Tanpa Logo - Tetap Gagah */
-        .header {
-            background: var(--japfa-navy); color: white;
-            padding: 45px 20px; text-align: center;
-            border-bottom: 6px solid var(--japfa-red);
-            border-bottom-left-radius: 35px; border-bottom-right-radius: 35px;
-        }
-
-        .header h1 { 
-            font-size: 22px; margin: 0; 
-            text-transform: uppercase; letter-spacing: 2px; 
-            font-weight: 800; 
-        }
-        
-        .header p { 
-            font-size: 13px; margin: 8px 0 0; 
-            opacity: 0.8; letter-spacing: 1px;
-            font-weight: 300;
-        }
-
-        .main-content { padding: 30px 20px; flex-grow: 1; }
-
-        .input-group { margin-bottom: 25px; text-align: left; }
-
-        label { 
-            font-size: 11px; font-weight: bold; color: var(--japfa-navy); 
-            text-transform: uppercase; margin-bottom: 10px; 
-            display: block; letter-spacing: 1px; 
-        }
-
-        select {
-            width: 100%; padding: 15px; border-radius: 12px;
-            border: 2px solid #e0e0e0; font-size: 16px; color: var(--japfa-navy);
-            background: #fff; outline: none; font-weight: 600;
-            appearance: none;
-        }
-
-        #reader { 
-            width: 100%; border-radius: 20px; overflow: hidden; 
-            border: none !important; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-        }
-
-        .btn-action {
-            display: none; width: 100%; padding: 20px;
-            background: var(--japfa-navy); color: white;
-            border: none; border-radius: 12px; 
-            font-weight: bold; font-size: 16px; text-transform: uppercase; 
-            margin-top: 25px; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 45, 98, 0.3);
-        }
-
-        #status-display {
-            margin-top: 20px; padding: 18px; border-radius: 12px;
-            font-size: 14px; background: #ffffff; border: 1px solid #eee;
-            line-height: 1.6; color: #444; text-align: center;
-        }
-
-        .footer {
-            padding: 20px; text-align: center; font-size: 10px;
-            color: #bbb; letter-spacing: 1px;
-        }
+        :root { --navy: #002D62; --red: #E31E24; --bg: #f4f7f6; }
+        body { font-family: sans-serif; margin: 0; background: var(--bg); display: flex; justify-content: center; }
+        .app { width: 100%; max-width: 480px; background: white; min-height: 100vh; }
+        .header { background: var(--navy); color: white; padding: 30px; text-align: center; border-bottom: 5px solid var(--red); border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
+        .content { padding: 20px; }
+        select { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #ddd; margin-bottom: 20px; font-size: 16px; }
+        #reader { width: 100%; border-radius: 15px; overflow: hidden; }
+        .btn { display: none; width: 100%; padding: 15px; background: var(--navy); color: white; border: none; border-radius: 10px; margin-top: 20px; font-weight: bold; }
+        #status { margin-top: 15px; padding: 15px; border-radius: 10px; font-size: 13px; background: #eee; text-align: center; }
     </style>
 </head>
 <body>
-
-<div class="app-container">
-    <div class="header">
-        <h1>SECURITY PATROL</h1>
-        <p>PT SANTOSA AGRINDO - UNIT PROBOLINGGO</p>
-    </div>
-
-    <div class="main-content">
-        <div class="input-group">
-            <label>Pilih Personil:</label>
-            <select id="personil">
-                <option value="Saeri">Saeri</option>
-                <option value="Ansori">Ansori</option>
-                <option value="Mustofa">Mustofa</option>
-                <option value="Ja'far Sodik">Ja'far Sodik</option>
-                <option value="Yusuf">Yusuf</option>
-                <option value="Abdul Rochim">Abdul Rochim</option>
-                <option value="M. Syaiful Rizal">M. Syaiful Rizal</option>
-                <option value="Akhmad Kholil">Akhmad Kholil</option>
-                <option value="Moh Sudi">Moh Sudi</option>
-                <option value="Buhar">Buhar</option>
-                <option value="Moh. Ainul Yakin">Moh. Ainul Yakin</option>
-                <option value="Pangestu">Pangestu</option>
-            </select>
-        </div>
-
+<div class="app">
+    <div class="header"><h1>SECURITY JAPFA</h1><p>UNIT PROBOLINGGO</p></div>
+    <div class="content">
+        <label>Nama Petugas:</label>
+        <select id="personil">
+            <option value="Saeri">Saeri</option>
+            <option value="Ansori">Ansori</option>
+            <option value="Mustofa">Mustofa</option>
+            <option value="Ja'far Sodik">Ja'far Sodik</option>
+            <option value="Yusuf">Yusuf</option>
+            <option value="Abdul Rochim">Abdul Rochim</option>
+            <option value="M. Syaiful Rizal">M. Syaiful Rizal</option>
+            <option value="Akhmad Kholil">Akhmad Kholil</option>
+            <option value="Moh Sudi">Moh Sudi</option>
+            <option value="Buhar">Buhar</option>
+            <option value="Moh. Ainul Yakin">Moh. Ainul Yakin</option>
+            <option value="Pangestu">Pangestu</option>
+        </select>
         <div id="reader"></div>
-
-        <button id="btn-next" class="btn-action" onclick="location.reload()">✅ Scan Selanjutnya</button>
-        
-        <div id="status-display">Silakan arahkan kamera ke barcode cekpoin untuk memulai patroli.</div>
-    </div>
-
-    <div class="footer">
-        SECURITY SYSTEM &copy; 2026
+        <button id="btn" class="btn" onclick="location.reload()">✅ SCAN BERIKUTNYA</button>
+        <div id="status">Siap Scan Cekpoin...</div>
     </div>
 </div>
-
 <script>
-    const html5QrCode = new Html5Qrcode("reader");
-    const statusDisplay = document.getElementById("status-display");
-
-    function startApp() {
-        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScan);
-    }
-
-    function onScan(decodedText) {
-        html5QrCode.stop();
-        statusDisplay.innerHTML = "<b>[SISTEM]</b> Mengunci GPS... Mohon jangan bergerak.";
-        statusDisplay.style.color = "#E31E24";
-
+    const scanner = new Html5Qrcode("reader");
+    const status = document.getElementById("status");
+    function start() { scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScan); }
+    function onScan(text) {
+        scanner.stop();
+        status.innerHTML = "<b>⏳ MENGUNCI LOKASI...</b>";
         navigator.geolocation.getCurrentPosition(function(pos) {
-            const lat = pos.coords.latitude;
-            const lon = pos.coords.longitude;
-            const mapLink = "https://www.google.com/maps?q=" + lat + "," + lon;
-            const user = document.getElementById("personil").value;
-
-            fetch("https://script.google.com/macros/s/AKfycbzISsPsXdRsExjLVZEpul0Bt1cBKtoDZbdZtMtLpPw-wc5YsW1RZU39lE3EvLoFo7w/exec", {
-                method: "POST",
-                mode: "no-cors",
-                body: JSON.stringify({ personil: user, cekpoin: decodedText, lokasi: mapLink })
+            fetch("https://script.google.com/macros/s/AKfycbwqUqZe1WjBY_2RVPxzQ4rHrK9coQlmujZJVXg2cakpQRl1Dpf-CXp_Aa6uQAPWZok/exec", {
+                method: "POST", mode: "no-cors",
+                body: JSON.stringify({
+                    unit: "Sheet1",
+                    personil: document.getElementById("personil").value,
+                    cekpoin: text,
+                    lokasi: "https://www.google.com/maps?q=" + pos.coords.latitude + "," + pos.coords.longitude
+                })
             }).then(() => {
-                statusDisplay.style.background = "#002D62";
-                statusDisplay.style.color = "#ffffff";
-                statusDisplay.style.border = "none";
-                statusDisplay.innerHTML = `<b>BERHASIL DISIMPAN</b><br>Lokasi: ${decodedText}<br>Koordinat: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
-                document.getElementById("btn-next").style.display = "block";
+                status.style.background = "#002D62"; status.style.color = "white";
+                status.innerHTML = "<b>✅ BERHASIL DISIMPAN!</b>";
+                document.getElementById("btn").style.display = "block";
             });
-
-        }, function(err) {
-            alert("Gagal mengunci lokasi. Pastikan GPS HP Aktif.");
-            location.reload();
-        }, { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 });
+        }, (err) => { alert("Aktifkan GPS!"); location.reload(); }, { enableHighAccuracy: true });
     }
-
-    startApp();
+    start();
 </script>
 </body>
 </html>
