@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patroli JAPFA - SGK</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root { --navy: #002D62; --red: #E31E24; --bg: #f4f7f6; }
+        body { font-family: sans-serif; margin: 0; background: var(--bg); display: flex; justify-content: center; }
+        .app { width: 100%; max-width: 480px; background: white; min-height: 100vh; }
+        .header { background: var(--navy); color: white; padding: 30px; text-align: center; border-bottom: 5px solid var(--red); border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
+        .content { padding: 20px; }
+        select { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #ddd; margin-bottom: 20px; font-size: 16px; }
+        #reader { width: 100%; border-radius: 15px; overflow: hidden; }
+        .btn { display: none; width: 100%; padding: 15px; background: var(--navy); color: white; border: none; border-radius: 10px; margin-top: 20px; font-weight: bold; }
+        #status { margin-top: 15px; padding: 15px; border-radius: 10px; font-size: 13px; background: #eee; text-align: center; }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="header"><h1>SECURITY JAPFA</h1><p>UNIT GUNUNG KAWI (SGK)</p></div>
+    <div class="content">
+        <label>Nama Petugas:</label>
+        <select id="personil">
+            <option value="Kusnadi">Kusnadi</option>
+            <option value="Mahmud">Mahmud</option>
+        </select>
+        <div id="reader"></div>
+        <button id="btn" class="btn" onclick="location.reload()">✅ SCAN BERIKUTNYA</button>
+        <div id="status">Siap Scan Cekpoin...</div>
+    </div>
+</div>
+<script>
+    const scanner = new Html5Qrcode("reader");
+    const status = document.getElementById("status");
+    function start() { scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, onScan); }
+    function onScan(text) {
+        scanner.stop();
+        status.innerHTML = "<b>⏳ MENGUNCI LOKASI...</b>";
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            fetch("https://script.google.com/macros/s/AKfycbwqUqZe1WjBY_2RVPxzQ4rHrK9coQlmujZJVXg2cakpQRl1Dpf-CXp_Aa6uQAPWZok/exec", {
+                method: "POST", mode: "no-cors",
+                body: JSON.stringify({
+                    unit: "SGK",
+                    personil: document.getElementById("personil").value,
+                    cekpoin: text,
+                    lokasi: "https://www.google.com/maps?q=" + pos.coords.latitude + "," + pos.coords.longitude
+                })
+            }).then(() => {
+                status.style.background = "#002D62"; status.style.color = "white";
+                status.innerHTML = "<b>✅ BERHASIL DISIMPAN!</b>";
+                document.getElementById("btn").style.display = "block";
+            });
+        }, (err) => { alert("Aktifkan GPS!"); location.reload(); }, { enableHighAccuracy: true });
+    }
+    start();
+</script>
+</body>
+</html>
